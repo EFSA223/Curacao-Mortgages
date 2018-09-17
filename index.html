@@ -29,7 +29,7 @@
 			position: absolute;
 			margin-top: 0;
 			top: 10px;
-			left: 32%;
+			left: 39%;
 			font-size: 2em;
 			font-family: "Lora", serif;
 			letter-spacing: .04em;
@@ -244,11 +244,12 @@
     // Leaflet Layer Control, Allow user to toggle layers on and off.
     // Layer controle has a double function layer control and leggend.
     var sourcesLayers = {
-      "<b style='color:#1f78b4'>Mortgage  </b>": mortgage,     
+     
       "<b style='color:#1f78b4'>Mortgage Class  </b>": hexaLayer,
+      "<b style='color:#1f78b4'>Mortgage  </b>": mortgage,
     };    
 
-    L.control.layers(null, sourcesLayers, { collapsed:false }).addTo(map);    
+    L.control.layers( sourcesLayers,null, { collapsed:false }).addTo(map);    
     
   </script>
 
