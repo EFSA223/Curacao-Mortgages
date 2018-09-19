@@ -6,7 +6,7 @@
   <title>Curacao Mortgages</title>
   <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
 
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.3/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css" />
   <link href='http://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
   
   <link href="https://fonts.googleapis.com/css?family=Noto+Sans" rel="stylesheet">
@@ -29,19 +29,18 @@
 			position: absolute;
 			margin-top: 0;
 			top: 10px;
-			left: 39%;
+			left: 55px;
 			font-size: 2em;
 			font-family: "Lora", serif;
 			letter-spacing: .04em;
 			padding: 10px 15px;
-			background: rgba(256, 256, 256, .4);
-			border: 1px solid grey;
+			background: rgba(256, 256, 256, .6);
+			border: 1px solid gray;
 			border-radius: 10px;
 			z-index: 800;
 		}    
 
     h2 {
-      display: inline-block;
       color: #001323;
     }
   
@@ -69,44 +68,52 @@
       width: 80%;
     }
  
-    c1 {
-      color: #364c91;
+    .legend {
+        padding: 6px 8px;
+        font-size: 1em;
+        background: rgba(255,255,255,0.8);
+        box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        border-radius: 5px;
     }
-    c2 {
-      color: #f4dc34;
+    .legend h3 {
+        font-size: 1.1em;
+        font-weight: normal;
+        color: #001323;
+        margin: 0 0 10px 0;
     }
-    c3 {
-      color: #18675e;
+    .legend span {
+        width: 20px;
+        height: 20px;
+        float: left;
+        margin: 0 10px 4px 0;
     }
-
-		a {
-			color: #001daa;
-			text-decoration: none;
-		}
-
-		a:hover {
-			text-decoration: underline;
-		}
+    .legend label {
+        font-size: 1.1em;
+    }
+    .legend label:after {
+        content: '';
+        display: block;
+        clear: both;
+    }
     
   </style>
 </head>
 
 <body>
   <header>
-    <h1>Curacao Mortgages Map</h1>
-    <h2>Map Subtitle</h2>
+    <h1>Curaçao Mortgages Map</h1>
   </header>
 
   <div id='map'></div>
 
   <section id="about">
-		<h2>about this map</h2>
-		<p>This webmap provides an overview of the number of issued mortgages in the period from 1993 up to and including 2018. </p>
-		<p>Map authored by me, Etienne Sambo</p>
+		<h2>About this map</h2>
+		<p>This webmap provides an overview of the number of issued mortgages in the period from 1993 up to and including 2018.</p><p>Data source: Stichting Kadaster en Openbare Registers Curaçao (Land Registry Office).</p>
+		<p>Map authored by, Etienne Sambo</p>
 	</section>
 
   <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>  
-  <script src="https://unpkg.com/leaflet@1.3.3/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/simple-statistics@5.2.1/dist/simple-statistics.min.js"></script>
   
   <script src="dataVAR/curMortgage.json"></script>
@@ -131,7 +138,13 @@
       maxZoom: 19
     });
     tiles.addTo(map);
-      
+    
+    var commonStyles = {
+      stroke: false,
+      radius: 5,
+      fillOpacity: 1
+    }
+    
     // Sorting the data values high to low,
     // Leaflet draws the larger ones first and the smaller ones on top of them
     mortgageLayer.features.sort(function(a, b) {
@@ -157,11 +170,11 @@
       },
       onEachFeature : function(feature,layer) {
         var countyName = feature.properties.Systeem;
-        var rentPrice = feature.properties.BedragNum;
+        var mortPrice = feature.properties.BedragNum;
         var jaar = feature.properties.Jaar;
         
         for(var typeSysteem in layer.feature.properties.Systeem) {
-          var mortgageTip = "<b>" + countyName + "</b><br> Mortgage: Nafl." + rentPrice +
+          var mortgageTip = "<b>" + countyName + "</b><br> Mortgage: Nafl." + mortPrice +
           "</b><br> Jaar: " + jaar + " ";
         };        
         
@@ -177,26 +190,74 @@
         });
         layer.bindTooltip(mortgageTip);
       }
-    }).addTo(map);                          
+    });//.addTo(map);                          
        
-      var hexaLayer = L.geoJson(hex500Layer, {
-        style: function(feature) {
-        return {
-            color: '#dddddd',
-            weight: 1,
-            fillOpacity: 1,
-            fillColor: '#1f78b4'
-          };
-        }, 
-         onEachFeature : function(feature, layer) {
-             //var countyName = feature.properties.NAME;
-             var rentPrice = feature.properties.count;
-             var rentTip = "<b>"+"</b> Mortgages per Hexa Area:<br> " + rentPrice;
-             layer.bindTooltip(rentTip);
-         }        
-      }).addTo(map);      
-      drawMap(hexaLayer);                
-    
+    var hexaLayer = L.geoJson(hex500Layer, {
+      style: function(feature) {
+      return {
+          color: '#dddddd',
+          weight: 1,
+          fillOpacity: 1,
+          fillColor: '#1f78b4'
+        };
+      }, 
+      onEachFeature : function(feature, layer) {
+           var mortPrice = feature.properties.count;
+           var mortTip = " Mortgages per Hexa Area:<br><b> " + mortPrice + "</b>";
+           layer.bindTooltip(mortTip);
+      }        
+    }).addTo(map);      
+    drawMap(hexaLayer);                
+
+//========================    
+    var hypotheken = L.geoJson(mortgageLayer, {
+      pointToLayer : function(feature, latlng) {
+        console.log();
+        return  L.circle(latlng, {
+                stroke: false,
+                fillOpacity: .8,
+                radius: 30
+        });
+      },      
+      onEachFeature : function(feature,layer) {
+        var countyName = feature.properties.Systeem;
+        var mortPrice = feature.properties.BedragNum;
+        var jaar = feature.properties.Jaar;
+        
+        for(var typeSysteem in layer.feature.properties.Systeem) {
+          var mortgageTip = "<b>" + countyName + "</b><br> Mortgage: Nafl." + mortPrice +
+          "</b><br> Jaar: " + jaar + " ";
+        };                
+        layer.on('mouseover', function() {
+          layer.setStyle({
+            fillOpacity: 1
+          });
+        });
+        layer.on('mouseout', function() {
+          layer.setStyle({
+              fillOpacity: .1
+          });
+        });
+        layer.bindTooltip(mortgageTip);
+      }
+    });//.addTo(map);
+
+    map.on('click', function(e) {      
+      hypotheken.eachLayer(function(layer) {
+        var distance = e.latlng.distanceTo(layer.getLatLng())/750; // distance as km
+        if(distance <= .75) {
+            layer.setStyle({
+                fillOpacity: 1,
+            });
+        } else {
+            layer.setStyle({
+                fillOpacity: .1
+            });
+        }; 
+      });       
+    });    
+//========================    
+        
     function getRadius(area) {
       var radius = Math.sqrt(area/(Math.PI*100));
       return radius * .8;
@@ -210,6 +271,7 @@
           fillColor: getColor(props[attributeValue], breaks)
         });
       });
+      drawLegend(breaks);
     }    
 
     function getClassBreaks(dataLayer) {
@@ -227,7 +289,6 @@
     };
     
     function getColor(d, breaks) {
-
       if(d <= breaks[0][1]) {
             return '#f1eef6';
         } else if(d <= breaks[1][1]) {
@@ -239,18 +300,33 @@
         } else if(d <= breaks[4][1]) {
             return '#045a8d'
         }
-    }   
+    };   
+
+    function drawLegend(breaks){
+        var legend = L.control({position: 'topright'});
+        legend.onAdd = function () {
+            var div = L.DomUtil.create('div', 'legend');
+            div.innerHTML = "<h3><b>Mortgages per Area<b/></h3>";
+            for (var i = 0; i < breaks.length; i++) {
+                var color = getColor(breaks[i][0], breaks);
+                div.innerHTML +=
+                    '<span style="background:' + color + '"></span> ' +
+                    '<label>'+(breaks[i][0]).toLocaleString() + ' &mdash; ' +
+                    (breaks[i][1]).toLocaleString() + '</label>';
+            }
+            return div;
+        };
+        legend.addTo(map);
+    }    
     
     // Leaflet Layer Control, Allow user to toggle layers on and off.
     // Layer controle has a double function layer control and leggend.
-    var sourcesLayers = {
-     
-      "<b style='color:#1f78b4'>Mortgage Class  </b>": hexaLayer,
-      "<b style='color:#1f78b4'>Mortgage  </b>": mortgage,
+    var sourcesLayers = {     
+      "<b style='color:#1f78b4'>Mortgage Class </b>": hexaLayer,
+      "<b style='color:#1f78b4'>Mortgage </b>": mortgage,      
+      "<b style='color:#1f78b4'>Mortgage 750m </b>": hypotheken
     };    
-
-    L.control.layers( sourcesLayers,null, { collapsed:false }).addTo(map);    
-    
+    L.control.layers( sourcesLayers,null, { collapsed:false }).addTo(map);        
   </script>
 
 </body>
